@@ -92,8 +92,66 @@ def voltageDividerVector(resistencias1, resistencias2, vin):
  resistenciaTotal2 = resistenciaGenerica(resistencias2)
  return voltageDivider(resistenciaTotal1, resistenciaTotal2, vin)
 
+def test_resistenciasIguales(cuantas, vin, precision):
+    r = [10,13,15,18,22,27,33,39,47,56,68,82]
+    multiplos = 4
+    #Voy provando una por una y saco las que pasan el test.
+    r1 = []
+    r2 = []
+    #r1.append(r)
+    #r2.append(r)
+    res = r
+    for i in range(multiplos):
+        for t in range(len(res)):
+             r1.append(r[t] * 10**i)
+             r2.append(r[t] * 10**i)
+    todos = []#Para sacalos a todos
+    mejor = [0,0,0]
+    for r11 in r1:
+        for r22 in r2:
+            #if(__test_resistencias(r11,r22,vin,precision, cuantas) != None):
+                salida = __test_resistencias_minPrecision(r11,r22,vin, cuantas)
+                if (mejor[0] < salida):
+                    mejor = [salida , r11 ,r22] 
+                print "Con las resistencias r1, r2 y vin: ",r11,r22,vin," la precision minima es:\n",  salida
+    print "El mejor es:",mejor
+    
+    
+def __test_resistencias(r11,r22,vin,precision, cuantas):
+    tensiones = []
+    for i in range(cuantas):
+        tensiones.append(voltageDivider(r11 + r11 * i, r22, vin))
+    anterior = tensiones[0]
+    for j in tensiones[1:]:
+        if(anterior - j < precision):
+            return None
+        else:
+            anterior = j
+    return tensiones
+
+def __test_resistencias_minPrecision(r11,r22,vin, cuantas):
+    tensiones = []
+    for i in range(cuantas):
+        tensiones.append(voltageDivider(r11 + r11 * i, r22, vin))
+    anterior = tensiones[0]
+    for j in range(len(tensiones[1:])):
+        #print anterior - tensiones[1:][j]
+        if(j == 0):
+            precision = anterior - tensiones[1:][j]
+        elif(anterior - tensiones[1:][j] < precision):
+            precision = anterior - tensiones[1:][j]
+        anterior = tensiones[1:][j]
+    return precision
+            
+            
+    
 #print voltageDividerVector([10,10,10,10,10], [r2], vin)
 
+#test_resistenciasIguales(5, 5, 0.1)
+#El mejor es: [0.2786276223776225, 15, 68]
 
 
+print __test_resistencias_minPrecision(15, 68, 5, 5)
+#for i in range(5):
+#    print "voltios para ",10 + 10 * i,voltageDivider(10 + 10 * i, 100, 5)
 
